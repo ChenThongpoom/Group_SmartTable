@@ -54,12 +54,15 @@ def camera(yVal, eye):
                 
             
         elif len(list(list(faces))) == 0 :
-#             print("Faceless")
-            count+=1
-            if count == 5:
-                print('Faceless')
+            print("Faceless")
+            
+            if count == 10:
+                print('count>>10')
+                eye.close()
                 return 
             else:
+                count+=1
+                time.sleep(1)
                 continue
 
         #Detect facial points
@@ -82,7 +85,7 @@ def camera(yVal, eye):
             
             print(leftEye[0][1])
             eye.send(leftEye[0][1])#focus on y coordinate
-            
+            count = 1
         
             
 
@@ -121,31 +124,35 @@ def condEye(eye,yVal):
 if __name__ == '__main__':
 #     print("Distance detecting...")
     #mainVoice('Distance detecting')
-    y = distanceUs1()
-    print(y)
-    pipeSend, pipeRecv  = Pipe()
-    p1 = Process(target=camera,args=(y, pipeSend,))
-    p2 = Process(target=condEye,args=(pipeRecv,y))
-    
-    p1.start()
-    p2.start()
-    p1.join()
-    p2.join()
-    
-    while p1.is_alive() == False:
-        time.sleep(0.5)
-        p2.terminate()
-        
-        time.sleep(0.1)
-#         print("Distance detecting again...")
-        
-        y1 = distanceUs1()
-        p1 = Process(target=camera,args=(y1, pipeSend,))
-        p2 = Process(target=condEye,args=(pipeRecv,y1))
+    try:
+        y = distanceUs1()
+        print(y)
+        pipeSend, pipeRecv  = Pipe()
+        p1 = Process(target=camera,args=(y, pipeSend,))
+        p2 = Process(target=condEye,args=(pipeRecv,y))
         
         p1.start()
         p2.start()
-    
+        p1.join()
+        while not p1.is_alive(): 
+            p2.terminate()
+            time.sleep(1)
+            y = distanceUs1()
+            print(y)
+            pipeSend, pipeRecv  = Pipe()
+            p1 = Process(target=camera,args=(y, pipeSend,))
+            p2 = Process(target=condEye,args=(pipeRecv,y))
+            
+            p1.start()
+            p2.start()
+            
+            p1.join()
+
+
+    except KeyboardInterrupt:
+        pipeSend.close()
+        p1.terminate()
+        time.sleep(0.1)
+        p2.terminate()
+        time.sleep(0.1)
         
-video_capture.release()
-cv2.destroyAllWindows()

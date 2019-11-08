@@ -53,32 +53,31 @@ def camera(yVal):
             frame = cv2.line(frame, (0,yVal-40),(1279,yVal-40),(0,0,255),2)
             frame = cv2.line(frame, (0,yVal),(1279,yVal),(0,0,255),2)
 
-
+            cv2.imshow('EYE_DETECTION',frame )
             
-#             if len(list(list(faces))) > 1:
-#                 print('there are more than one person in the camera')
-# #                 call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/morePeople.wav 2>/dev/null"], shell=True)
-#                 continue
-#                 
-#                 
-#             elif len(list(list(faces))) == 0 :
-#                 print("Faceless")
-#                 time.sleep(1)
-#                 
-#                 if count == 10:
-#                     print('count>>20')
-# #                     call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
-#                     p1.terminate()
-#                     time.sleep(0.1)
-#                     return ''
-#                 else:
-#                     count +=1
-#                     continue
-#                 pipeCondSend3('again')  # pipe send data to condEye function to check the condition
-#                 return
-                
-                
-                
+            if len(list(list(faces))) == 0:
+                print("Faceless")
+                     
+                if count == 10:
+                    print('count>>10')
+#                     call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
+                    leftEyeSend.close()
+                    p1.terminate()
+                    time.sleep(1)
+#                     p1.join()
+#                     video_capture.release()
+#                     cv2.destroyWindow("EYE_DETECTION")
+                    return ''
+                else:
+                    count +=1
+                    time.sleep(1)
+                    continue
+
+            elif len(list(list(faces))) > 1:
+                print('there are more than one person in the camera')
+#                 call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/morePeople.wav 2>/dev/null"], shell=True)
+                continue
+
             #Detect facial points
             for face in faces:
 
@@ -105,34 +104,14 @@ def camera(yVal):
                 
                 
             #Show video feed
-            cv2.imshow('EYE_DETECTION',frame )
+            
             
             
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 p1.terminate()
                 time.sleep(0.1)
                 return
-            elif len(list(list(faces))) == 0:
-                print("Faceless")
-                
-                
-                if count == 10:
-                    print('count>>10')
-#                     call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
-                    leftEyeSend.close()
-                    p1.terminate()
-                    time.sleep(1)
-#                     p1.join()
-                    return ''
-                else:
-                    count +=1
-                    time.sleep(1)
-                    continue
-
-            elif len(list(list(faces))) > 1:
-                print('there are more than one person in the camera')
-#                 call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/morePeople.wav 2>/dev/null"], shell=True)
-                continue
+            
             
             
     except KeyboardInterrupt:
@@ -187,9 +166,3 @@ if __name__ == '__main__':
     while x == '':
         time.sleep(1)
         x = camera(distanceUs1())
-
-    
-    
-    
-video_capture.release()
-cv2.destroyAllWindows()
