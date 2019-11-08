@@ -49,10 +49,11 @@ def camera(yVal):
     
 
 
-                    #making reference lines
+            #making reference lines
             frame = cv2.line(frame, (0,yVal-40),(1279,yVal-40),(0,0,255),2)
             frame = cv2.line(frame, (0,yVal),(1279,yVal),(0,0,255),2)
-
+            
+            #Show video feed
             cv2.imshow('EYE_DETECTION',frame )
             
             if len(list(list(faces))) == 0:
@@ -60,7 +61,7 @@ def camera(yVal):
                      
                 if count == 10:
                     print('count>>10')
-#                     call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
+                    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
                     leftEyeSend.close()
                     p1.terminate()
                     time.sleep(1)
@@ -75,7 +76,8 @@ def camera(yVal):
 
             elif len(list(list(faces))) > 1:
                 print('there are more than one person in the camera')
-#                 call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/morePeople.wav 2>/dev/null"], shell=True)
+                call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/morePeople.wav 2>/dev/null"], shell=True)
+                time.sleep(2)
                 continue
 
             #Detect facial points
@@ -103,9 +105,6 @@ def camera(yVal):
                 count = 1
                 
                 
-            #Show video feed
-            
-            
             
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 p1.terminate()
@@ -122,39 +121,40 @@ def camera(yVal):
     
 def condEye(yVal,left):
     
-#     leftEyeQueue = queue.Queue()
-#     
-#     t1 = threading.Thread(target=camera, args=(yVal,leftEyeQueue,))
-#     t1.start()
     try:
         cond = ''
-        count = 0
+        countDone = 0
+        countUp = 0
+        countDown = 0
         while True:
             test = left.recv()
-#             check = pipeCondRecv3.recv()  # pipe receive the condition from camera function to loop the process
-#             print(yVal,' is y val')
-#             print("Test is ", test)
+
             if test >= yVal-40 and test <= yVal:
                 cond = 'stop'
                 moveLinear(cond)
                 print("Good position")
-#                 call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/DoneMove.wav 2>/dev/null"], shell=True)
-#                 count += 1
-#                 if count == 5:
-#                     print("do nothing")
-#                     return  # pipe stop the p2 process
+                if countDone == 0: 
+                    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/DoneMove.wav 2>/dev/null"], shell=True)
+                    countDone += 1    
                 
             elif test < yVal-40:
                 cond = 'up'
                 moveLinear(cond)
                 print("Table is moving up")
-#                 call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/Up.wav 2>/dev/null"], shell=True)
+                countUp += 1
+                if countUp == 5:
+                    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/Up.wav 2>/dev/null"], shell=True)
+                    countUp = 0
             elif test > yVal:
                 cond = 'down'
                 moveLinear(cond)
                 print("Table is moving down")
-#                 call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/Down.wav 2>/dev/null"], shell=True)
-
+                countDown += 1
+                if countDown == 5:
+                    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/Down.wav 2>/dev/null"], shell=True)
+                    countDown = 0
+                    
+                    
     except KeyboardInterrupt:
         return 
     

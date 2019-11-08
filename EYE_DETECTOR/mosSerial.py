@@ -75,7 +75,7 @@ def distanceUs1():
 #     engine = pyttsx.init()
     
     print('Distance detecting...')
-#     call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/Disdetect.wav 2>/dev/null"], shell=True)
+    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Disdetect.wav 2>/dev/null"], shell=True)
 #     while True
     while count <= 3:
         ser.write(str.encode('a'))
@@ -90,7 +90,7 @@ def distanceUs1():
                 countDis += 1
                 if countDis % 5 == 0:
                     print("close")
-#                     call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/Close.wav 2>/dev/null"], shell=True)
+                    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Close.wav 2>/dev/null"], shell=True)
                     time.sleep(2)
 #                     mainVoice('Too close')
 #                     engine.say("You are sitting too close to the camera") #tooClose
@@ -99,7 +99,7 @@ def distanceUs1():
                 countDis += 1
                 if countDis % 5==0:
                     print("Far")
-#                     call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/Far.wav 2>/dev/null"], shell=True)
+                    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Far.wav 2>/dev/null"], shell=True)
                     time.sleep(2)
                     
 #                     mainVoice('Too far')
