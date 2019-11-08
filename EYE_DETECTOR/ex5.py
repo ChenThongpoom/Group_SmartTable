@@ -118,6 +118,7 @@ def camera(yVal):
                 if count == 10:
                     print('count>>20')
 #                     call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
+                    p1.close()
                     p1.terminate()
                     time.sleep(0.1)
                     return ''
