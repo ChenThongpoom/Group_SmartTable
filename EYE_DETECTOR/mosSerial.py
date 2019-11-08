@@ -109,4 +109,7 @@ def distanceUs1():
     return(int(x))
     
 # print(distanceUs1())
-    
+# for i in range(2):
+#     x = distanceUs1()
+#     print(x)
+#     

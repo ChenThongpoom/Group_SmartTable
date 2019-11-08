@@ -110,20 +110,23 @@ def camera(yVal):
             
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 p1.terminate()
+                time.sleep(0.1)
                 return
             elif len(list(list(faces))) == 0:
                 print("Faceless")
-                time.sleep(1)
+                
                 
                 if count == 10:
-                    print('count>>20')
+                    print('count>>10')
 #                     call(["aplay /home/pi/Desktop/Group4_SMART_TABLE-master/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
-                    p1.close()
+                    leftEyeSend.close()
                     p1.terminate()
-                    time.sleep(0.1)
+                    time.sleep(1)
+#                     p1.join()
                     return ''
                 else:
                     count +=1
+                    time.sleep(1)
                     continue
 
             elif len(list(list(faces))) > 1:
@@ -133,6 +136,8 @@ def camera(yVal):
             
             
     except KeyboardInterrupt:
+        p1.terminate()
+        time.sleep(0.1)
         return
     
     
@@ -177,10 +182,10 @@ def condEye(yVal,left):
             
             
 if __name__ == '__main__':
-    
-    x = camera(distanceUs1())
+    y = distanceUs1()
+    x = camera(y)
     while x == '':
-        x = None
+        time.sleep(1)
         x = camera(distanceUs1())
 
     

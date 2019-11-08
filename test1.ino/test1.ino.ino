@@ -40,7 +40,7 @@ void linearUp(){
   digitalWrite(forward2,HIGH);
   digitalWrite(backward,LOW);
   digitalWrite(backward2,LOW);
-  Serial.println("u");
+  
 }
 
 
@@ -49,7 +49,7 @@ void linearDown(){
   digitalWrite(forward2,LOW);
   digitalWrite(backward,HIGH);
   digitalWrite(backward2,HIGH);
-  Serial.println("d");
+  
 }
 
 
@@ -58,7 +58,7 @@ void linearStop(){
   digitalWrite(forward2,LOW);
   digitalWrite(backward,LOW);
   digitalWrite(backward2,LOW);
-  Serial.println("q");
+  
 }
 
 
@@ -77,6 +77,7 @@ pinMode(inPin, INPUT);
 duration = pulseIn(inPin, HIGH);
 cm = microsecondsToCentimeters(duration);
 Serial.println(cm);
+
 //
 //if (cm > 40 and cm < 70)
 //{
