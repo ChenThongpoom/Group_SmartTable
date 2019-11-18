@@ -55,6 +55,7 @@ def moveLinear(cond):
 #         con = ser.readline()
 #         txt = 'Table done moving'
 #         mainVoice(txt)
+        return 
     return "done"
 
 # def linearDown(cond):
@@ -77,7 +78,7 @@ def distanceUs1():
     print('Distance detecting...')
     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Disdetect.wav 2>/dev/null"], shell=True)
 #     while True
-    while count <= 3:
+    while count <= 1:
         ser.write(str.encode('a'))
         #if ser.in_waiting > 0:
         line = ser.readline()
@@ -105,7 +106,7 @@ def distanceUs1():
 #                     mainVoice('Too far')
 #                     engine.say("You are sitting too far to the camera")  #tooFar
 #                     engine.runAndWait()
-    x = Sum // 3
+    x = Sum // 1
     return(int(x))
     
 # print(distanceUs1())

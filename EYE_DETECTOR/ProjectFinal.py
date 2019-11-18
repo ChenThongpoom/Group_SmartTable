@@ -8,7 +8,7 @@ import time
 import dlib
 import cv2
 import threading
-from mosSerial import distanceUs1, moveLinear
+from SerialFinal import distanceUs1, moveLinear
 from multiprocessing import Process , Pipe
 import threading
 import queue
@@ -59,24 +59,24 @@ def camera(yVal):
             if len(list(list(faces))) == 0:
                 print("Faceless")
                      
-                if count == 10:
-                    print('count>>10')
-                    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
+                if count == 50:
+                    print('count>>50')
+#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
                     leftEyeSend.close()
                     p1.terminate()
-                    time.sleep(1)
+                    time.sleep(0.1)
 #                     p1.join()
 #                     video_capture.release()
 #                     cv2.destroyWindow("EYE_DETECTION")
                     return ''
                 else:
                     count +=1
-                    time.sleep(1)
                     continue
+                    
 
             elif len(list(list(faces))) > 1:
                 print('there are more than one person in the camera')
-                call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/morePeople.wav 2>/dev/null"], shell=True)
+#                 call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/morePeople.wav 2>/dev/null"], shell=True)
                 time.sleep(2)
                 continue
 
@@ -114,49 +114,51 @@ def camera(yVal):
             
             
     except KeyboardInterrupt:
+        leftEyeSend.close()
         p1.terminate()
         time.sleep(0.1)
+        video_capture.release()
+        cv2.destroyAllWindows()
         return
     
     
 def condEye(yVal,left):
     
-    try:
-        cond = ''
-        countDone = 0
-        countUp = 0
-        countDown = 0
-        while True:
-            test = left.recv()
+    
+    cond = ''
+    countDone = 0
+    countUp = 0
+    countDown = 0
+    while True:
+        test = left.recv()
 
-            if test >= yVal-40 and test <= yVal:
-                cond = 'stop'
-                moveLinear(cond)
-                print("Good position")
-                if countDone == 0: 
-                    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/DoneMove.wav 2>/dev/null"], shell=True)
-                    countDone += 1    
+        if test >= yVal-40 and test <= yVal:
+            cond = 'stop'
+            moveLinear(cond)
+            print("Good position")
+            if countDone == 0: 
+#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/DoneMove.wav 2>/dev/null"], shell=True)
+                countDone += 1    
+            
+        elif test < yVal-40:
+            cond = 'up'
+            moveLinear(cond)
+            print("Table is moving up")
+            countUp += 1
+            if countUp == 5:
+#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/Up.wav 2>/dev/null"], shell=True)
+                countUp = 0
+        elif test > yVal:
+            cond = 'down'
+            moveLinear(cond)
+            print("Table is moving down")
+            countDown += 1
+            if countDown == 5:
+#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/Down.wav 2>/dev/null"], shell=True)
+                countDown = 0
                 
-            elif test < yVal-40:
-                cond = 'up'
-                moveLinear(cond)
-                print("Table is moving up")
-                countUp += 1
-                if countUp == 5:
-                    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/Up.wav 2>/dev/null"], shell=True)
-                    countUp = 0
-            elif test > yVal:
-                cond = 'down'
-                moveLinear(cond)
-                print("Table is moving down")
-                countDown += 1
-                if countDown == 5:
-                    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/Down.wav 2>/dev/null"], shell=True)
-                    countDown = 0
                     
-                    
-    except KeyboardInterrupt:
-        return 
+    
     
             
             
@@ -166,3 +168,4 @@ if __name__ == '__main__':
     while x == '':
         time.sleep(1)
         x = camera(distanceUs1())
+    
