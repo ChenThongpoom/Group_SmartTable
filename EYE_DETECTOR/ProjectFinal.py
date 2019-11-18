@@ -14,10 +14,10 @@ import threading
 import queue
 from num2words import num2words
 from subprocess import call
-#from voiceCommandStates import main
 
 
-#mainVoice('The system start running')
+
+
 #Load face detector and predictor, uses dlib shape predictor file
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
@@ -61,7 +61,7 @@ def camera(yVal):
                      
                 if count == 50:
                     print('count>>50')
-#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
+                    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
                     leftEyeSend.close()
                     p1.terminate()
                     time.sleep(0.1)
@@ -73,11 +73,11 @@ def camera(yVal):
                     count +=1
                     continue
                     
+                    
 
-            elif len(list(list(faces))) > 1:
+            if len(list(list(faces))) > 1:
                 print('there are more than one person in the camera')
-#                 call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/morePeople.wav 2>/dev/null"], shell=True)
-                time.sleep(2)
+                call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/morePeople.wav 2>/dev/null"], shell=True)
                 continue
 
             #Detect facial points
@@ -103,13 +103,6 @@ def camera(yVal):
                 
                 leftEyeSend.send(leftEye[0][1])
                 count = 1
-                
-                
-            
-            if cv2.waitKey(1) & 0xFF == ord("q"):
-                p1.terminate()
-                time.sleep(0.1)
-                return
             
             
             
@@ -122,13 +115,12 @@ def camera(yVal):
         return
     
     
+    
 def condEye(yVal,left):
     
     
     cond = ''
     countDone = 0
-    countUp = 0
-    countDown = 0
     while True:
         test = left.recv()
 
@@ -136,26 +128,21 @@ def condEye(yVal,left):
             cond = 'stop'
             moveLinear(cond)
             print("Good position")
-            if countDone == 0: 
-#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/DoneMove.wav 2>/dev/null"], shell=True)
-                countDone += 1    
+            countDone+=1
+            if countDone == 5: 
+                call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/DoneMove.wav 2>/dev/null"], shell=True)
+   
             
         elif test < yVal-40:
             cond = 'up'
             moveLinear(cond)
             print("Table is moving up")
-            countUp += 1
-            if countUp == 5:
-#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/Up.wav 2>/dev/null"], shell=True)
-                countUp = 0
+            countDone = 0
         elif test > yVal:
             cond = 'down'
             moveLinear(cond)
             print("Table is moving down")
-            countDown += 1
-            if countDown == 5:
-#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/Down.wav 2>/dev/null"], shell=True)
-                countDown = 0
+            countDone = 0
                 
                     
     
