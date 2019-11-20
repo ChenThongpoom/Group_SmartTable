@@ -8,7 +8,7 @@ import time
 import dlib
 import cv2
 import threading
-from serialtest import distanceUs1, moveLinear
+from serialtest import distanceUs1, moveLinear, distanceUs2
 from multiprocessing import Process , Pipe
 import threading
 import queue
@@ -32,8 +32,11 @@ video_capture = cv2.VideoCapture(0)
 def camera(yVal):
     count = 1
     leftEyeSend,leftEyeRecv = Pipe()
+#     distanceSend, distanceRecv = Pipe()
     
     p1 = Process(target = condEye, args=(yVal, leftEyeRecv))
+#     p2 = Process(target = distanceUs2, args=(distanceSend,))
+    
     p1.start()
     try:
         while True:
@@ -59,26 +62,40 @@ def camera(yVal):
             if len(list(list(faces))) == 0:
                 print("Faceless")
                      
-                if count == 10:
-                    print('count>>10')
+                if count == 20:
+                    print('count>>20')
 #                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
                     leftEyeSend.close()
                     p1.terminate()
-                    time.sleep(1)
+                    time.sleep(0.1)
 #                     p1.join()
 #                     video_capture.release()
 #                     cv2.destroyWindow("EYE_DETECTION")
                     return ''
                 else:
                     count +=1
-                    time.sleep(1)
+#                     time.sleep(1)
                     continue
 
             elif len(list(list(faces))) > 1:
                 print('there are more than one person in the camera')
 #                 call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/morePeople.wav 2>/dev/null"], shell=True)
-                time.sleep(2)
+                
                 continue
+#             elif type(distanceRecv.recv()) == str:
+#                 print('too far/close')
+#                 if count == 20:
+#                     print('count>>20')
+# #                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
+#                     leftEyeSend.close()
+#                     p1.terminate()
+#                     time.sleep(0.1)
+#                     return ''
+#                 
+#                 else:
+#                     count +=1
+#                     time.sleep(1)
+#                     continue
 
             #Detect facial points
             for face in faces:
@@ -114,8 +131,13 @@ def camera(yVal):
             
             
     except KeyboardInterrupt:
+        leftEyeSend.close()
+#         distanceSend.close()
         p1.terminate()
+#         p2.terminate()
         time.sleep(0.1)
+        video_capture.release()
+        cv2.destroyAllWindows()
         return
     
     

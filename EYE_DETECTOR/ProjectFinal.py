@@ -13,7 +13,7 @@ from multiprocessing import Process , Pipe
 import threading
 import queue
 from num2words import num2words
-from subprocess import call
+import subprocess as sp
 
 
 
@@ -31,6 +31,7 @@ video_capture = cv2.VideoCapture(0)
 
 def camera(yVal):
     count = 1
+    countsp = 0
     leftEyeSend,leftEyeRecv = Pipe()
     
     p1 = Process(target = condEye, args=(yVal, leftEyeRecv))
@@ -59,25 +60,26 @@ def camera(yVal):
             if len(list(list(faces))) == 0:
                 print("Faceless")
                      
-                if count == 50:
-                    print('count>>50')
-                    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
+                if count == 20:
+                    print('count>>20')
+                    sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
                     leftEyeSend.close()
                     p1.terminate()
                     time.sleep(0.1)
-#                     p1.join()
-#                     video_capture.release()
-#                     cv2.destroyWindow("EYE_DETECTION")
                     return ''
                 else:
                     count +=1
+                    moveLinear('stop')
                     continue
                     
                     
 
             if len(list(list(faces))) > 1:
                 print('there are more than one person in the camera')
-                call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/morePeople.wav 2>/dev/null"], shell=True)
+                moveLinear('stop')
+                if countsp == 0:
+                    sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/morePeople.wav 2>/dev/null"], shell=True)
+                    countsp +=1
                 continue
 
             #Detect facial points
@@ -103,7 +105,12 @@ def camera(yVal):
                 
                 leftEyeSend.send(leftEye[0][1])
                 count = 1
-            
+                countsp = 0
+                
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                p1.terminate()
+                time.sleep(0.1)
+                return
             
             
     except KeyboardInterrupt:
@@ -121,6 +128,8 @@ def condEye(yVal,left):
     
     cond = ''
     countDone = 0
+    countUp = 0
+    countDown = 0
     while True:
         test = left.recv()
 
@@ -129,20 +138,33 @@ def condEye(yVal,left):
             moveLinear(cond)
             print("Good position")
             countDone+=1
-            if countDone == 5: 
-                call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/DoneMove.wav 2>/dev/null"], shell=True)
-   
+            countDown = 0
+            countUp = 0
+            if countDone == 10: 
+                sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/DoneMove.wav 2>/dev/null"], shell=True)
+#                 end_time = time.time()
+#                 runTime = end_time-start_time
+#                 print(round(runTime,2))
             
         elif test < yVal-40:
             cond = 'up'
             moveLinear(cond)
             print("Table is moving up")
             countDone = 0
+            countDown = 0
+            countUp += 1
+            if countUp==10:
+                sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Up.wav 2>/dev/null"], shell=True)
+        
         elif test > yVal:
             cond = 'down'
             moveLinear(cond)
             print("Table is moving down")
             countDone = 0
+            countUp = 0
+            countDown += 1
+            if countDown == 10:
+                sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Down.wav 2>/dev/null"], shell=True)
                 
                     
     
@@ -150,9 +172,11 @@ def condEye(yVal,left):
             
             
 if __name__ == '__main__':
+#     start_time = time.time()
     y = distanceUs1()
     x = camera(y)
     while x == '':
+#         start_time = time.time()
         time.sleep(1)
         x = camera(distanceUs1())
     

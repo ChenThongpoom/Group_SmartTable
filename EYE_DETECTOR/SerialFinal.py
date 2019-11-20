@@ -5,7 +5,7 @@ import sys
 import threading
 import queue
 from num2words import num2words
-from subprocess import call
+import subprocess as sp
 
 
 ser = serial.Serial(
@@ -19,20 +19,21 @@ ser = serial.Serial(
 
 
 def moveLinear(cond):
+    
     if cond == 'up':
         ser.write(str.encode('u'))
         time.sleep(0.05)
-
+        
         return
     elif cond == 'down':
         ser.write(str.encode('d'))
         time.sleep(0.05)
-
+        
         return
     elif cond == 'stop':
         ser.write(str.encode('q'))
         time.sleep(0.05)
-
+        
         return 
     return "done"
 
@@ -46,7 +47,7 @@ def distanceUs1():
 
     
     print('Distance detecting...')
-    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Disdetect.wav 2>/dev/null"], shell=True)
+    sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Disdetect.wav 2>/dev/null"], shell=True)
 
     while count <= 1:
         ser.write(str.encode('a'))
@@ -59,14 +60,14 @@ def distanceUs1():
                 countDis += 1
                 if countDis % 5 == 0:
                     print("close")
-                    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Close.wav 2>/dev/null"], shell=True)
+                    sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Close.wav 2>/dev/null"], shell=True)
                     
 
             elif int(line.decode()) > 70:
                 countDis += 1
                 if countDis % 5==0:
                     print("Far")
-                    call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Far.wav 2>/dev/null"], shell=True)
+                    sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Far.wav 2>/dev/null"], shell=True)
                     
                                       
     x = Sum // 1

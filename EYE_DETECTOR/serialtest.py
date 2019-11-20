@@ -18,70 +18,42 @@ ser = serial.Serial(
                 timeout=1)
 
 
-# def distanceUs():
-#     count = 1
-#     avg = 0
-#     while count <= 3:
-#         ser.write(str.encode('a'))
-#         #if ser.in_waiting > 0:
-#         line = ser.readline()
-#         #print("calculating...")
-#         #print(line.decode())
-#         if line.decode() != '':
-#             avg += int(line.decode())
-#             count += 1 pipeEye.send(self.leftEye[0][1])
-#             print(avg)
-#     avg = avg // 3
-#     return int(avg)
 
 def moveLinear(cond):
     if cond == 'up':
         ser.write(str.encode('u'))
         time.sleep(0.05)
-#         con = ser.readline()
-#         txt = 'The table is moving up'
-#         mainVoice(txt)
+
         return
     elif cond == 'down':
         ser.write(str.encode('d'))
         time.sleep(0.05)
-#         con = ser.readline()
-#         txt = 'The table is moving down'
-#         mainVoice(txt)
+
         return
     elif cond == 'stop':
         ser.write(str.encode('q'))
         time.sleep(0.05)
-#         con = ser.readline()
-#         txt = 'Table done moving'
-#         mainVoice(txt)
+        
+        return
     return "done"
 
-# def linearDown(cond):
-#     ser.write(str.encode('d'))
-#     txt = ser.readline()
-#     return txt.decode()
-#     
-# def linearStop():
-#     ser.write(str.encode('q'))
-#     txt = ser.readline()
-#     return txt.decode()
+
 
 def distanceUs1():
     x = 0
     Sum = 0
     count = 1
     countDis = 1
-#     engine = pyttsx.init()
+
     
     print('Distance detecting...')
 #     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Disdetect.wav 2>/dev/null"], shell=True)
-#     while True
-    while count <= 3:
+
+    while count <= 1:
         ser.write(str.encode('a'))
-        #if ser.in_waiting > 0:
+
         line = ser.readline()
-#         print(line.decode())
+
         if line.decode() != '':
             if int(line.decode()) > 40 and int(line.decode()) < 70:
                 Sum += (math.tan(20))* int(line.decode())
@@ -91,19 +63,45 @@ def distanceUs1():
                 if countDis % 5 == 0:
                     print("close")
 #                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Close.wav 2>/dev/null"], shell=True)
-                    time.sleep(2)
-#                     mainVoice('Too close')
-#                     engine.say("You are sitting too close to the camera") #tooClose
-#                     engine.runAndWait()
+
+
             elif int(line.decode()) > 70:
                 countDis += 1
                 if countDis % 5==0:
                     print("Far")
-#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Far.wav 2>/dev/null"], shell=True)
-                    time.sleep(2)
-                    
-#                     mainVoice('Too far')
-#                     engine.say("You are sitting too far to the camera")  #tooFar
-#                     engine.runAndWait()
-    x = Sum // 3
+#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Far.wav 2>/dev/null"], shell=True
+    x = Sum // 1
     return(int(x))
+
+
+def distanceUs2(disSend):
+    
+    count = 1
+    countDis = 1
+
+    
+    print('Distance detecting...')
+#     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Disdetect.wav 2>/dev/null"], shell=True)
+    while True:
+        Sum = 0
+        ser.write(str.encode('a'))
+
+        line = ser.readline()
+
+        if line.decode() != '':
+            if int(line.decode()) > 40 and int(line.decode()) < 70:
+                Sum += (math.tan(20))* int(line.decode())
+                disSend.send(Sum)
+            elif int(line.decode()) < 40:
+                countDis += 1
+                if countDis % 5 == 0:
+                    disSend.send("close")
+#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Close.wav 2>/dev/null"], shell=True)
+
+            elif int(line.decode()) > 70:
+                countDis += 1
+                if countDis % 5==0:
+                    print("Far")
+                    disSend.send("Far")
+#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Far.wav 2>/dev/null"], shell=True)
+                        
