@@ -8,36 +8,35 @@ import time
 import dlib
 import cv2
 import threading
-from serialtest import distanceUs1, moveLinear, distanceUs2
+from serialtest import distanceUs1, moveLinear
 from multiprocessing import Process , Pipe
 import threading
 import queue
 from num2words import num2words
-from subprocess import call
-#from voiceCommandStates import main
+import subprocess as sp
 
 
-#mainVoice('The system start running')
-#Load face detector and predictor, uses dlib shape predictor file
-detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
 
-#Extract indexes of facial landmarks for the left and right eye
-(lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS['left_eye']
-(rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS['right_eye']
+start_time = time.time()
 
-#Start webcam video capture
-video_capture = cv2.VideoCapture(0)
 
 def camera(yVal):
     count = 1
+    countsp = 0
     leftEyeSend,leftEyeRecv = Pipe()
-#     distanceSend, distanceRecv = Pipe()
     
     p1 = Process(target = condEye, args=(yVal, leftEyeRecv))
-#     p2 = Process(target = distanceUs2, args=(distanceSend,))
-    
     p1.start()
+    
+    #Load face detector and predictor, uses dlib shape predictor file
+    detector = dlib.get_frontal_face_detector()
+    predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+
+    #Extract indexes of facial landmarks for the left and right eye
+    (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS['left_eye']
+
+    #Start webcam video capture
+    video_capture = cv2.VideoCapture(0)
     try:
         while True:
             
@@ -59,132 +58,112 @@ def camera(yVal):
             #Show video feed
             cv2.imshow('EYE_DETECTION',frame )
             
-            if len(list(list(faces))) == 0:
+            if len(faces) == 0:
                 print("Faceless")
                      
                 if count == 20:
                     print('count>>20')
-#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
+                    sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
                     leftEyeSend.close()
                     p1.terminate()
                     time.sleep(0.1)
-#                     p1.join()
-#                     video_capture.release()
-#                     cv2.destroyWindow("EYE_DETECTION")
                     return ''
                 else:
                     count +=1
-#                     time.sleep(1)
+                    moveLinear('stop')
                     continue
+                    
+                    
 
-            elif len(list(list(faces))) > 1:
-                print('there are more than one person in the camera')
-#                 call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/morePeople.wav 2>/dev/null"], shell=True)
-                
+            if len(faces) > 1:
+#                 print('there are more than one person in the camera')
+                moveLinear('stop')
+                if countsp == 0:
+                    sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/morePeople.wav 2>/dev/null"], shell=True)
+                    countsp +=1
                 continue
-#             elif type(distanceRecv.recv()) == str:
-#                 print('too far/close')
-#                 if count == 20:
-#                     print('count>>20')
-# #                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/noPeople.wav 2>/dev/null"], shell=True)
-#                     leftEyeSend.close()
-#                     p1.terminate()
-#                     time.sleep(0.1)
-#                     return ''
-#                 
-#                 else:
-#                     count +=1
-#                     time.sleep(1)
-#                     continue
 
-            #Detect facial points
-            for face in faces:
+            shape = predictor(gray, faces[0])
+            shape = face_utils.shape_to_np(shape)
 
-                shape = predictor(gray, face)
-                shape = face_utils.shape_to_np(shape)
-
-                #Get array of coordinates of leftEye and rightEye
-                leftEye = shape[lStart:lEnd]
-                rightEye = shape[rStart:rEnd]
-
-
-                #Use hull to remove convex contour discrepencies and draw eye shape around eyes
-                leftEyeHull = cv2.convexHull(leftEye)
-                rightEyeHull = cv2.convexHull(rightEye)
-                cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
-                cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
-                
-                
-                
-                time.sleep(0.05)
-                
-                leftEyeSend.send(leftEye[0][1])
-                count = 1
-                
-                
+            #Get array of coordinates of leftEye and rightEye
+            leftEye = shape[lStart:lEnd]
             
+            leftEyeSend.send(leftEye[0][1])
+            count = 1
+            countsp = 0
+                
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 p1.terminate()
                 time.sleep(0.1)
                 return
             
             
-            
     except KeyboardInterrupt:
         leftEyeSend.close()
-#         distanceSend.close()
         p1.terminate()
-#         p2.terminate()
         time.sleep(0.1)
+        moveLinear('stop')
         video_capture.release()
         cv2.destroyAllWindows()
         return
     
     
+    
 def condEye(yVal,left):
     
-    try:
-        cond = ''
-        countDone = 0
-        countUp = 0
-        countDown = 0
-        while True:
-            test = left.recv()
-
-            if test >= yVal-40 and test <= yVal:
-                cond = 'stop'
-                moveLinear(cond)
-                print("Good position")
-                if countDone == 0: 
-#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/DoneMove.wav 2>/dev/null"], shell=True)
-                    countDone += 1    
+    
+    cond = ''
+    countDone = 0
+    countUp = 0
+    countDown = 0
+    while True:
+        test = left.recv()
+        if test >= yVal-30 and test <= yVal-10:
+            cond = 'stop'
+            moveLinear(cond)
+            print("Good position")
+            countDone+=1
+            countDown = 0
+            countUp = 0
+            if countDone == 10: 
+                sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/DoneMove.wav 2>/dev/null"], shell=True)
+                end_time = time.time()
+                runTime = end_time-start_time
+                print(round(runTime,3))
+            
+        elif test < yVal-40:
+            cond = 'up'
+            moveLinear(cond)
+            print("Table is moving up")
+            countDone = 0
+            countDown = 0
+            countUp += 1
+            if countUp==10:
+                sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Up.wav 2>/dev/null"], shell=True)
+        
+        elif test > yVal:
+            cond = 'down'
+            moveLinear(cond)
+            print("Table is moving down")
+            countDone = 0
+            countUp = 0
+            countDown += 1
+            if countDown == 10:
+                sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Down.wav 2>/dev/null"], shell=True)
                 
-            elif test < yVal-40:
-                cond = 'up'
-                moveLinear(cond)
-                print("Table is moving up")
-                countUp += 1
-                if countUp == 5:
-#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/Up.wav 2>/dev/null"], shell=True)
-                    countUp = 0
-            elif test > yVal:
-                cond = 'down'
-                moveLinear(cond)
-                print("Table is moving down")
-                countDown += 1
-                if countDown == 5:
-#                     call(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/soundForSOT/Down.wav 2>/dev/null"], shell=True)
-                    countDown = 0
                     
-                    
-    except KeyboardInterrupt:
-        return 
+    
     
             
             
 if __name__ == '__main__':
+    
     y = distanceUs1()
     x = camera(y)
     while x == '':
+        cv2.destroyAllWindows()
+        start_time = time.time()
         time.sleep(1)
         x = camera(distanceUs1())
+    

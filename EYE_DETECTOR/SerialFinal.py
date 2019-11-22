@@ -49,7 +49,7 @@ def distanceUs1():
     print('Distance detecting...')
     sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Disdetect.wav 2>/dev/null"], shell=True)
 
-    while count <= 1:
+    while count <= 3:
         ser.write(str.encode('a'))
         line = ser.readline()
         if line.decode() != '':
@@ -70,7 +70,7 @@ def distanceUs1():
                     sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Far.wav 2>/dev/null"], shell=True)
                     
                                       
-    x = Sum // 1
+    x = Sum // 3
     return(int(x))
     
  
