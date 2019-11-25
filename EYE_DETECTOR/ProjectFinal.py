@@ -126,7 +126,7 @@ def condEye(yVal,left):
 
         if test >= yVal-30 and test <= yVal-10:
             cond = 'stop'
-#             moveLinear(cond)
+            moveLinear(cond)
             print("Good position")
             countDone+=1
             countDown = 0
