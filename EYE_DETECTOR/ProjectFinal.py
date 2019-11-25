@@ -126,31 +126,31 @@ def condEye(yVal,left):
 
         if test >= yVal-30 and test <= yVal-10:
             cond = 'stop'
-            moveLinear(cond)
+#             moveLinear(cond)
             print("Good position")
             countDone+=1
             countDown = 0
             countUp = 0
             if countDone == 10: 
                 sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/DoneMove.wav 2>/dev/null"], shell=True)
-                
+            
                     
         elif test < yVal-40:
             cond = 'up'
             moveLinear(cond)
-#             print("Table is moving up")
+            print("Table is moving up")
             countDone = 0
             countDown = 0
             countUp += 1
 
             if countUp==10:
                 sp.Popen(["aplay /home/pi/Documents/Group4_SMART_TABLE/soundForSOT/Up.wav 2>/dev/null"], shell=True)
-                
+#                 
                 
         elif test > yVal:
             cond = 'down'
             moveLinear(cond)
-#             print("Table is moving down")
+            print("Table is moving down")
             countDone = 0
             countUp = 0
             countDown += 1
